@@ -1,8 +1,13 @@
-# Environment
+# =============================================================
+# MindGuard — .gitignore
+# =============================================================
+
+# ── Environment ────────────────────────────────────────────
 .env
 .env.*
+!.env.example
 
-# Python
+# ── Python ─────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.pyo
@@ -10,36 +15,50 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
+env/
 
-# Node
+# ── Node ───────────────────────────────────────────────────
 node_modules/
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
 pnpm-lock.yaml
 
-# IDE
+# ── Build Artifacts ────────────────────────────────────────
+dist/
+build/
+*.egg
+
+# ── IDE & Editor ───────────────────────────────────────────
 .vscode/
 .idea/
-
-# OS
+*.swp
+*.swo
 .DS_Store
 Thumbs.db
 
-# Logs
+# ── Logs ───────────────────────────────────────────────────
 logs/
 *.log
 
-# Python cache
+# ── Python Testing & Typing ────────────────────────────────
 .pytest_cache/
 .mypy_cache/
-
-# Coverage
+.ruff_cache/
 .coverage
 htmlcov/
+coverage.xml
 
-# Build
-dist/
-build/
+# ── Databases (local development only) ─────────────────────
+*.db
+*.sqlite3
 
-# Docker overrides
+# ── Generated Dataset (regenerate via dataset/generator.py) ─
+dataset/generated/
+
+# ── Docker ─────────────────────────────────────────────────
 docker-compose.override.yml
+
+# ── Compiled / Binary ──────────────────────────────────────
+*.pyc
+*.pyo
