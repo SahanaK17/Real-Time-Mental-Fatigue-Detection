@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* ── Design Tokens ─────────────────────────── */
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 216 12.2% 83.9%;
+    --radius: 0.5rem;
+
+    /* ── Brand Colors ─────────────────────────── */
+    --brand-primary: 199 89% 48%;       /* Cyan */
+    --brand-secondary: 262 83% 58%;     /* Purple */
+    --brand-accent: 160 84% 39%;        /* Emerald */
+    --brand-warning: 38 92% 50%;        /* Amber */
+    --brand-danger: 0 84% 60%;          /* Red */
+
+    /* ── Fatigue Level Colors ──────────────────── */
+    --fatigue-alert: 160 84% 39%;       /* Green */
+    --fatigue-mild: 199 89% 48%;        /* Cyan */
+    --fatigue-moderate: 38 92% 50%;     /* Amber */
+    --fatigue-high: 25 95% 53%;         /* Orange */
+    --fatigue-critical: 0 84% 60%;      /* Red */
+
+    /* ── Glassmorphism ────────────────────────── */
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+@layer components {
+  /* Glassmorphism card */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--brand-primary)), hsl(var(--brand-secondary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Fatigue gauge glow effects */
+  .glow-alert    { box-shadow: 0 0 20px hsl(var(--fatigue-alert) / 0.4); }
+  .glow-mild     { box-shadow: 0 0 20px hsl(var(--fatigue-mild) / 0.4); }
+  .glow-moderate { box-shadow: 0 0 20px hsl(var(--fatigue-moderate) / 0.4); }
+  .glow-high     { box-shadow: 0 0 20px hsl(var(--fatigue-high) / 0.4); }
+  .glow-critical { box-shadow: 0 0 20px hsl(var(--fatigue-critical) / 0.4); }
+
+  /* Animated gradient border */
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(hsl(var(--background)), hsl(var(--background))) padding-box,
+                linear-gradient(135deg, hsl(var(--brand-primary)), hsl(var(--brand-secondary))) border-box;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+  }
+
+  /* Pulse animation for live indicator */
+  .live-pulse {
+    position: relative;
+  }
+
+  .live-pulse::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, hsl(var(--brand-primary) / 0.3), hsl(var(--brand-secondary) / 0.3));
+    animation: pulse-ring 2s ease-in-out infinite;
+    z-index: -1;
+  }
+}
+
+@layer utilities {
+  /* Text gradients */
+  .text-gradient-brand {
+    background: linear-gradient(135deg, hsl(var(--brand-primary)), hsl(var(--brand-secondary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-warm {
+    background: linear-gradient(135deg, hsl(var(--brand-warning)), hsl(var(--brand-danger)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Fatigue level utilities */
+  .fatigue-alert    { color: hsl(var(--fatigue-alert)); }
+  .fatigue-mild     { color: hsl(var(--fatigue-mild)); }
+  .fatigue-moderate { color: hsl(var(--fatigue-moderate)); }
+  .fatigue-high     { color: hsl(var(--fatigue-high)); }
+  .fatigue-critical { color: hsl(var(--fatigue-critical)); }
+}
+
+/* ── Animations ──────────────────────────────────────── */
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(1.02); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes score-tick {
+  0%   { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+.animate-float   { animation: float 3s ease-in-out infinite; }
+.animate-shimmer {
+  background: linear-gradient(90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted-foreground) / 0.3) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}

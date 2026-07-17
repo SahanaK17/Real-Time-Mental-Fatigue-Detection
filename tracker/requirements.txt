@@ -1,0 +1,24 @@
+# Tracker Dependencies
+# Install with: pip install -r tracker/requirements.txt
+
+# Input monitoring (keyboard + mouse — privacy-preserving)
+pynput==1.7.7
+
+# HTTP requests to backend API
+requests==2.32.3
+urllib3==2.2.1
+
+# Secure token storage
+keyring==25.2.1
+
+# Retry logic
+tenacity==8.3.0
+
+# CLI argument parsing (stdlib, no install needed)
+# argparse — built in
+
+# Dev
+python-dotenv==1.0.1
+
+websockets==12.0
+plyer==2.1.0

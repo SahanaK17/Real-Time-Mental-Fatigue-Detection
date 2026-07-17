@@ -1,0 +1,106 @@
+version: "3.9"
+
+# ============================================================
+# Mental Fatigue Detector — Docker Compose (Development)
+# Hot-reload enabled for both frontend and backend
+# Usage: docker compose -f docker-compose.dev.yml up
+# ============================================================
+
+networks:
+  mf_network:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:
+  redis_data_dev:
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: mf_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mental_fatigue_db_dev
+      POSTGRES_USER: mf_user
+      POSTGRES_PASSWORD: mf_dev_password
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - mf_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mf_user -d mental_fatigue_db_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: mf_redis_dev
+    restart: unless-stopped
+    command: redis-server --requirepass mf_redis_dev_password
+    volumes:
+      - redis_data_dev:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - mf_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+      target: development
+    container_name: mf_backend_dev
+    restart: unless-stopped
+    environment:
+      - APP_ENV=development
+      - DEBUG=true
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=mental_fatigue_db_dev
+      - POSTGRES_USER=mf_user
+      - POSTGRES_PASSWORD=mf_dev_password
+      - DATABASE_URL=postgresql://mf_user:mf_dev_password@postgres:5432/mental_fatigue_db_dev
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=mf_redis_dev_password
+      - REDIS_URL=redis://:mf_redis_dev_password@redis:6379/0
+      - SECRET_KEY=dev-secret-key-not-for-production-use
+      - JWT_SECRET_KEY=dev-jwt-key-not-for-production-use
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - ./backend:/app
+      - ./ml/models:/app/ml/models
+    ports:
+      - "8000:8000"
+    networks:
+      - mf_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    image: node:20-alpine
+    container_name: mf_frontend_dev
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_WS_BASE_URL=ws://localhost:8000
+      - VITE_APP_NAME=Mental Fatigue Detector
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    networks:
+      - mf_network
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
