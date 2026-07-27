@@ -7,6 +7,10 @@
 .env.*
 !.env.example
 
+# ── Databases (local development only) ─────────────────────
+*.db
+*.sqlite3
+
 # ── Python ─────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
