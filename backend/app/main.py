@@ -55,6 +55,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Test Redis connection
     import asyncio
+
     try:
         await asyncio.wait_for(redis_client.ping(), timeout=1.0)
         logger.info("Redis connection established")
@@ -66,6 +67,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Load ML model into memory
     try:
         from app.ml.inference import model_registry
+
         await model_registry.load()
         logger.info("ML model loaded into memory")
     except Exception as e:
@@ -193,11 +195,16 @@ Most endpoints require a **Bearer token** obtained from `/api/v1/auth/login`.
         # Check ML model
         try:
             from app.ml.inference import model_registry
+
             health["services"]["ml_model"] = "loaded" if model_registry.is_loaded else "not_loaded"
         except Exception:
             health["services"]["ml_model"] = "unavailable"
 
-        status_code = status.HTTP_200_OK if health["status"] == "healthy" else status.HTTP_503_SERVICE_UNAVAILABLE
+        status_code = (
+            status.HTTP_200_OK
+            if health["status"] == "healthy"
+            else status.HTTP_503_SERVICE_UNAVAILABLE
+        )
         return JSONResponse(content=health, status_code=status_code)
 
     @app.get("/", tags=["System"], include_in_schema=False)

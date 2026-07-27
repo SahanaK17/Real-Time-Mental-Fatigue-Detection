@@ -58,6 +58,7 @@ async def get_high_risk_users(
     db: AsyncSession = Depends(get_db),
 ):
     from datetime import datetime, timedelta, timezone
+
     cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
 
     result = await db.execute(
@@ -80,15 +81,17 @@ async def get_high_risk_users(
         user_result = await db.execute(select(User).where(User.id == row.user_id))
         user = user_result.scalar_one_or_none()
         if user:
-            high_risk.append({
-                "user_id": str(row.user_id),
-                "email": user.email,
-                "full_name": user.full_name,
-                "department": user.department,
-                "avg_fatigue_score": round(float(row.avg_score), 3),
-                "max_fatigue_score": round(float(row.max_score), 3),
-                "prediction_count": int(row.count),
-            })
+            high_risk.append(
+                {
+                    "user_id": str(row.user_id),
+                    "email": user.email,
+                    "full_name": user.full_name,
+                    "department": user.department,
+                    "avg_fatigue_score": round(float(row.avg_score), 3),
+                    "max_fatigue_score": round(float(row.max_score), 3),
+                    "prediction_count": int(row.count),
+                }
+            )
 
     return {"threshold": threshold, "high_risk_users": high_risk}
 
@@ -99,19 +102,28 @@ async def get_admin_stats(
     db: AsyncSession = Depends(get_db),
 ):
     from datetime import datetime, timedelta, timezone
+
     now = datetime.now(timezone.utc)
     today = now - timedelta(hours=24)
 
     total_users = (await db.execute(select(func.count(User.id)))).scalar()
-    active_sessions = (await db.execute(
-        select(func.count(TrackerSession.id)).where(TrackerSession.status == "active")
-    )).scalar()
-    predictions_today = (await db.execute(
-        select(func.count(FatiguePrediction.id)).where(FatiguePrediction.predicted_at >= today)
-    )).scalar()
-    avg_score_today = (await db.execute(
-        select(func.avg(FatiguePrediction.fatigue_score)).where(FatiguePrediction.predicted_at >= today)
-    )).scalar()
+    active_sessions = (
+        await db.execute(
+            select(func.count(TrackerSession.id)).where(TrackerSession.status == "active")
+        )
+    ).scalar()
+    predictions_today = (
+        await db.execute(
+            select(func.count(FatiguePrediction.id)).where(FatiguePrediction.predicted_at >= today)
+        )
+    ).scalar()
+    avg_score_today = (
+        await db.execute(
+            select(func.avg(FatiguePrediction.fatigue_score)).where(
+                FatiguePrediction.predicted_at >= today
+            )
+        )
+    ).scalar()
 
     return {
         "total_users": total_users,
@@ -141,18 +153,22 @@ async def export_csv(
 
     for row in rows:
         pred = row.FatiguePrediction
-        writer.writerow([
-            pred.predicted_at.isoformat(),
-            row.email,
-            round(pred.fatigue_score, 4),
-            pred.fatigue_level.value
-        ])
+        writer.writerow(
+            [
+                pred.predicted_at.isoformat(),
+                row.email,
+                round(pred.fatigue_score, 4),
+                pred.fatigue_level.value,
+            ]
+        )
 
     output.seek(0)
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=fatigue_export_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv"}
+        headers={
+            "Content-Disposition": f"attachment; filename=fatigue_export_{datetime.now(timezone.utc).strftime('%Y%m%d')}.csv"
+        },
     )
 
 
@@ -168,8 +184,18 @@ async def export_pdf(
     now = datetime.now(timezone.utc)
     today = now - timedelta(hours=24)
     total_users = (await db.execute(select(func.count(User.id)))).scalar()
-    predictions_today = (await db.execute(select(func.count(FatiguePrediction.id)).where(FatiguePrediction.predicted_at >= today))).scalar()
-    avg_score_today = (await db.execute(select(func.avg(FatiguePrediction.fatigue_score)).where(FatiguePrediction.predicted_at >= today))).scalar()
+    predictions_today = (
+        await db.execute(
+            select(func.count(FatiguePrediction.id)).where(FatiguePrediction.predicted_at >= today)
+        )
+    ).scalar()
+    avg_score_today = (
+        await db.execute(
+            select(func.avg(FatiguePrediction.fatigue_score)).where(
+                FatiguePrediction.predicted_at >= today
+            )
+        )
+    ).scalar()
 
     output = io.BytesIO()
     p = canvas.Canvas(output, pagesize=letter)
@@ -178,7 +204,7 @@ async def export_pdf(
     # Title
     p.setFont("Helvetica-Bold", 20)
     p.drawString(50, height - 50, "MindGuard - Admin Report")
-    
+
     # Date
     p.setFont("Helvetica", 12)
     p.drawString(50, height - 70, f"Generated: {now.strftime('%Y-%m-%d %H:%M:%S UTC')}")
@@ -189,19 +215,22 @@ async def export_pdf(
     p.setFont("Helvetica", 12)
     p.drawString(50, height - 130, f"Total Users: {total_users}")
     p.drawString(50, height - 150, f"Predictions Made: {predictions_today}")
-    p.drawString(50, height - 170, f"Average Fatigue Score: {round(float(avg_score_today or 0), 3)}")
+    p.drawString(
+        50, height - 170, f"Average Fatigue Score: {round(float(avg_score_today or 0), 3)}"
+    )
 
     # Footer
     p.setFont("Helvetica-Oblique", 10)
     p.drawString(50, 50, "This report was auto-generated by the MindGuard system.")
-    
+
     p.showPage()
     p.save()
     output.seek(0)
-    
-    return StreamingResponse(
-        output, 
-        media_type="application/pdf", 
-        headers={"Content-Disposition": f"attachment; filename=admin_report_{now.strftime('%Y%m%d')}.pdf"}
-    )
 
+    return StreamingResponse(
+        output,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=admin_report_{now.strftime('%Y%m%d')}.pdf"
+        },
+    )

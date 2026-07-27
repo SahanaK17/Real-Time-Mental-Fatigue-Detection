@@ -43,21 +43,23 @@ class BehaviourSnapshotCreate(BaseModel):
     session_elapsed_s: int = Field(default=0, ge=0)
     time_of_day_hour: Optional[float] = Field(default=None, ge=0, le=24)
 
-    model_config = {"json_schema_extra": {
-        "example": {
-            "session_id": "550e8400-e29b-41d4-a716-446655440000",
-            "typing_speed_wpm": 65.5,
-            "key_hold_time_ms": 85.3,
-            "flight_time_ms": 120.7,
-            "backspace_count": 2,
-            "error_rate": 0.05,
-            "mouse_speed_px_s": 450.2,
-            "mouse_distance_px": 892.5,
-            "click_frequency": 0.8,
-            "session_elapsed_s": 3600,
-            "time_of_day_hour": 14.5,
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "session_id": "550e8400-e29b-41d4-a716-446655440000",
+                "typing_speed_wpm": 65.5,
+                "key_hold_time_ms": 85.3,
+                "flight_time_ms": 120.7,
+                "backspace_count": 2,
+                "error_rate": 0.05,
+                "mouse_speed_px_s": 450.2,
+                "mouse_distance_px": 892.5,
+                "click_frequency": 0.8,
+                "session_elapsed_s": 3600,
+                "time_of_day_hour": 14.5,
+            }
         }
-    }}
+    }
 
 
 class BehaviourSnapshotResponse(BaseModel):

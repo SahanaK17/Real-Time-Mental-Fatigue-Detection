@@ -47,6 +47,7 @@ async def mark_as_read(
     db: AsyncSession = Depends(get_db),
 ):
     from datetime import datetime, timezone
+
     result = await db.execute(
         select(Notification).where(
             Notification.id == notification_id,
@@ -68,6 +69,7 @@ async def mark_all_read(
 ):
     from datetime import datetime, timezone
     from sqlalchemy import update
+
     await db.execute(
         update(Notification)
         .where(Notification.user_id == current_user.id, Notification.is_read == False)

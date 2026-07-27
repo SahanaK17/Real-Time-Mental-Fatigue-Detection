@@ -53,7 +53,9 @@ class FatigueDatasetGenerator:
         Returns:
             DataFrame with features and binary/multi-class fatigue labels.
         """
-        print(f"[*] Generating {n_samples:,} samples (seed={self.rng.bit_generator.state['state']['state']})")
+        print(
+            f"[*] Generating {n_samples:,} samples (seed={self.rng.bit_generator.state['state']['state']})"
+        )
 
         # Step 1: Generate user profiles (simulate diverse employee types)
         print("  → Generating user profiles...")
@@ -76,50 +78,51 @@ class FatigueDatasetGenerator:
         labels = self._compute_fatigue_labels(keyboard, mouse, context, profiles)
 
         # Step 6: Assemble final DataFrame
-        df = pd.DataFrame({
-            # Context
-            "user_id": profiles["user_id"],
-            "session_length_minutes": context["session_length"],
-            "time_of_day_hour": context["time_of_day"],
-            "day_of_week": context["day_of_week"],
-            "previous_fatigue_score": context["prev_fatigue"],
-            "stress_index": context["stress_index"],
-            "break_frequency_per_hour": context["break_freq"],
-            "sleep_hours_last_night": context["sleep_hours"],
-            "coffee_intake_cups": context["coffee_cups"],
-            "workload_score": context["workload"],
-            "task_complexity": context["task_complexity"],
-            "productivity_score": context["productivity"],
-
-            # Keyboard
-            "typing_speed_wpm": keyboard["speed_wpm"],
-            "typing_speed_cpm": keyboard["speed_cpm"],
-            "key_hold_time_ms": keyboard["hold_time"],
-            "flight_time_ms": keyboard["flight_time"],
-            "backspace_count_per_min": keyboard["backspace_rate"],
-            "error_rate": keyboard["error_rate"],
-            "idle_time_keyboard_s": keyboard["idle_time"],
-            "typing_burst_score": keyboard["burst_score"],
-            "typing_rhythm_variance": keyboard["rhythm_var"],
-            "total_keystrokes_per_min": keyboard["keystrokes"],
-
-            # Mouse
-            "mouse_speed_px_s": mouse["speed"],
-            "mouse_acceleration": mouse["acceleration"],
-            "mouse_distance_px_per_min": mouse["distance"],
-            "click_frequency_per_min": mouse["clicks"],
-            "double_click_rate": mouse["double_clicks"],
-            "scroll_speed": mouse["scroll_speed"],
-            "idle_time_mouse_s": mouse["idle_time"],
-            "direction_changes_per_min": mouse["direction_changes"],
-            "hover_duration_ms": mouse["hover"],
-            "drag_count_per_min": mouse["drags"],
-
-            # Labels
-            "fatigue_score": labels["fatigue_score"],
-            "fatigue_label": labels["fatigue_label"],      # Binary: 0=alert, 1=fatigued
-            "fatigue_level": labels["fatigue_level"],      # Multi: alert/mild/moderate/high/critical
-        })
+        df = pd.DataFrame(
+            {
+                # Context
+                "user_id": profiles["user_id"],
+                "session_length_minutes": context["session_length"],
+                "time_of_day_hour": context["time_of_day"],
+                "day_of_week": context["day_of_week"],
+                "previous_fatigue_score": context["prev_fatigue"],
+                "stress_index": context["stress_index"],
+                "break_frequency_per_hour": context["break_freq"],
+                "sleep_hours_last_night": context["sleep_hours"],
+                "coffee_intake_cups": context["coffee_cups"],
+                "workload_score": context["workload"],
+                "task_complexity": context["task_complexity"],
+                "productivity_score": context["productivity"],
+                # Keyboard
+                "typing_speed_wpm": keyboard["speed_wpm"],
+                "typing_speed_cpm": keyboard["speed_cpm"],
+                "key_hold_time_ms": keyboard["hold_time"],
+                "flight_time_ms": keyboard["flight_time"],
+                "backspace_count_per_min": keyboard["backspace_rate"],
+                "error_rate": keyboard["error_rate"],
+                "idle_time_keyboard_s": keyboard["idle_time"],
+                "typing_burst_score": keyboard["burst_score"],
+                "typing_rhythm_variance": keyboard["rhythm_var"],
+                "total_keystrokes_per_min": keyboard["keystrokes"],
+                # Mouse
+                "mouse_speed_px_s": mouse["speed"],
+                "mouse_acceleration": mouse["acceleration"],
+                "mouse_distance_px_per_min": mouse["distance"],
+                "click_frequency_per_min": mouse["clicks"],
+                "double_click_rate": mouse["double_clicks"],
+                "scroll_speed": mouse["scroll_speed"],
+                "idle_time_mouse_s": mouse["idle_time"],
+                "direction_changes_per_min": mouse["direction_changes"],
+                "hover_duration_ms": mouse["hover"],
+                "drag_count_per_min": mouse["drags"],
+                # Labels
+                "fatigue_score": labels["fatigue_score"],
+                "fatigue_label": labels["fatigue_label"],  # Binary: 0=alert, 1=fatigued
+                "fatigue_level": labels[
+                    "fatigue_level"
+                ],  # Multi: alert/mild/moderate/high/critical
+            }
+        )
 
         print(f"  → Dataset shape: {df.shape}")
         print(f"  → Fatigue distribution:\n{df['fatigue_level'].value_counts().to_string()}")
@@ -188,7 +191,9 @@ class FatigueDatasetGenerator:
         task_complexity = rng.uniform(0, 1, size=n)
 
         # Productivity score (0-1)
-        productivity = (1 - prev_fatigue * 0.5 + sleep_hours / 20 + rng.normal(0, 0.1, size=n)).clip(0, 1)
+        productivity = (
+            1 - prev_fatigue * 0.5 + sleep_hours / 20 + rng.normal(0, 0.1, size=n)
+        ).clip(0, 1)
 
         return {
             "session_length": session_length,
@@ -216,11 +221,11 @@ class FatigueDatasetGenerator:
         # Compute latent fatigue factor (0-1) from context
         # This drives how much degradation occurs
         latent_fatigue = (
-            0.35 * (ctx["session_length"] / 480)          # Session duration effect
-            + 0.25 * (1 - ctx["sleep_hours"] / 10)        # Sleep deprivation
-            + 0.20 * ctx["prev_fatigue"]                   # Carry-over fatigue
-            + 0.15 * ctx["stress_index"]                   # Stress effect
-            + 0.05 * ctx["workload"]                       # Workload
+            0.35 * (ctx["session_length"] / 480)  # Session duration effect
+            + 0.25 * (1 - ctx["sleep_hours"] / 10)  # Sleep deprivation
+            + 0.20 * ctx["prev_fatigue"]  # Carry-over fatigue
+            + 0.15 * ctx["stress_index"]  # Stress effect
+            + 0.05 * ctx["workload"]  # Workload
         ).clip(0, 1)
 
         # Post-lunch dip (13:00-15:00 has natural fatigue spike)
@@ -229,24 +234,24 @@ class FatigueDatasetGenerator:
 
         # Fatigue degrades typing speed by up to 40%
         speed_degradation = 1 - latent_fatigue * 0.40
-        speed_wpm = (profiles["base_speed"] * speed_degradation
-                     + rng.normal(0, 5, size=n)).clip(5, 130)
+        speed_wpm = (profiles["base_speed"] * speed_degradation + rng.normal(0, 5, size=n)).clip(
+            5, 130
+        )
         speed_cpm = speed_wpm * 5 + rng.normal(0, 15, size=n)
 
         # Fatigue increases key hold time (slower motor responses)
         base_hold = 90  # ms
-        hold_time = (base_hold + latent_fatigue * 60
-                     + rng.normal(0, 15, size=n)).clip(30, 400)
+        hold_time = (base_hold + latent_fatigue * 60 + rng.normal(0, 15, size=n)).clip(30, 400)
 
         # Fatigue increases flight time
         base_flight = 150  # ms
-        flight_time = (base_flight + latent_fatigue * 120
-                       + rng.normal(0, 30, size=n)).clip(50, 800)
+        flight_time = (base_flight + latent_fatigue * 120 + rng.normal(0, 30, size=n)).clip(50, 800)
 
         # Fatigue increases error/backspace rate
         base_backspace = 1.5  # per minute
-        backspace_rate = (base_backspace + latent_fatigue * 6
-                          + rng.exponential(1, size=n)).clip(0, 30)
+        backspace_rate = (base_backspace + latent_fatigue * 6 + rng.exponential(1, size=n)).clip(
+            0, 30
+        )
         error_rate = (backspace_rate / (speed_cpm + 1)).clip(0, 0.5)
 
         # Idle time increases with fatigue
@@ -288,8 +293,9 @@ class FatigueDatasetGenerator:
 
         # Mouse speed decreases with fatigue
         base_speed = 350 * mouse_skill
-        speed = (base_speed * (1 - latent_fatigue * 0.35)
-                 + rng.normal(0, 50, size=n)).clip(20, 1500)
+        speed = (base_speed * (1 - latent_fatigue * 0.35) + rng.normal(0, 50, size=n)).clip(
+            20, 1500
+        )
 
         # Acceleration becomes more erratic
         acceleration = (rng.normal(0, 100, size=n) * (1 + latent_fatigue * 1.5)).clip(-500, 500)
@@ -299,8 +305,7 @@ class FatigueDatasetGenerator:
 
         # Click frequency decreases with fatigue
         base_clicks = 8.0  # clicks per minute
-        clicks = (base_clicks * (1 - latent_fatigue * 0.5)
-                  + rng.exponential(2, size=n)).clip(0, 40)
+        clicks = (base_clicks * (1 - latent_fatigue * 0.5) + rng.exponential(2, size=n)).clip(0, 40)
 
         # Double click rate (misclicks increase with fatigue)
         double_clicks = (0.5 + latent_fatigue * 2 + rng.exponential(0.3, size=n)).clip(0, 10)
@@ -433,7 +438,12 @@ class FatigueDatasetGenerator:
         print(f"\n   Fatigue level distribution:")
         print(f"   {df['fatigue_level'].value_counts().to_dict()}")
         print(f"\n   Feature statistics:")
-        print(df[["typing_speed_wpm", "error_rate", "mouse_speed_px_s", "idle_time_keyboard_s"]].describe().round(3).to_string())
+        print(
+            df[["typing_speed_wpm", "error_rate", "mouse_speed_px_s", "idle_time_keyboard_s"]]
+            .describe()
+            .round(3)
+            .to_string()
+        )
 
 
 def main():
@@ -458,7 +468,7 @@ def main():
     print("  Mental Fatigue Synthetic Dataset Generator")
     print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("============================================================")
-    
+
     generator = FatigueDatasetGenerator(seed=args.seed, noise_level=args.noise)
     df = generator.generate(n_samples=args.rows)
     df = generator.add_noise(df, noise_fraction=args.label_noise)

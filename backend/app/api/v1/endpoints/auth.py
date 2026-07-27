@@ -48,6 +48,7 @@ router = APIRouter()
 
 # ── Helpers ───────────────────────────────────────────────
 
+
 async def _log_audit(
     db: AsyncSession,
     user_id: Optional[str],
@@ -69,6 +70,7 @@ async def _log_audit(
 
 
 # ── Endpoints ─────────────────────────────────────────────
+
 
 @router.post(
     "/signup",
@@ -144,14 +146,14 @@ async def login(
     # Support login with email or username
     identifier = form_data.username.lower()
     result = await db.execute(
-        select(User).where(
-            (User.email == identifier) | (User.username == identifier)
-        )
+        select(User).where((User.email == identifier) | (User.username == identifier))
     )
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(form_data.password, user.hashed_password):
-        await _log_audit(db, None, "login_failed", request, success=False, details={"identifier": identifier})
+        await _log_audit(
+            db, None, "login_failed", request, success=False, details={"identifier": identifier}
+        )
         await db.commit()
         raise AuthenticationError("Invalid credentials")
 
@@ -234,10 +236,12 @@ async def logout(
     token = auth_header.replace("Bearer ", "")
 
     from app.core.security import decode_access_token
+
     payload = decode_access_token(token)
     if payload and payload.get("jti"):
         # Blacklist until original expiry
         import time
+
         remaining = int(payload.get("exp", 0) - time.time())
         if remaining > 0:
             await redis_client.blacklist_token(payload["jti"], remaining)
@@ -283,9 +287,7 @@ async def forgot_password(
             extra_claims={"type": "password_reset"},
         )
         # Store in Redis
-        await redis_client.set(
-            f"reset_token:{str(user.id)}", reset_token, expire=900
-        )
+        await redis_client.set(f"reset_token:{str(user.id)}", reset_token, expire=900)
         # Send email in background (stub — configure SMTP in settings)
         logger.info("Password reset requested", user_id=str(user.id))
         # background_tasks.add_task(send_reset_email, user.email, reset_token)
@@ -306,6 +308,7 @@ async def reset_password(
     Reset the user's password using the token received by email.
     """
     from app.core.security import decode_access_token
+
     token_payload = decode_access_token(payload.token)
 
     if not token_payload or token_payload.get("type") != "access":
@@ -329,4 +332,6 @@ async def reset_password(
     await db.commit()
 
     logger.info("Password reset successful", user_id=user_id)
-    return {"message": "Password has been reset successfully. Please log in with your new password."}
+    return {
+        "message": "Password has been reset successfully. Please log in with your new password."
+    }

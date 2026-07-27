@@ -17,6 +17,7 @@ class Base(DeclarativeBase):
     def __tablename__(cls) -> str:
         """Auto-generate lowercase table names from class names."""
         import re
+
         # Convert CamelCase to snake_case
         name = re.sub(r"(?<!^)(?=[A-Z])", "_", cls.__name__).lower()
         return name

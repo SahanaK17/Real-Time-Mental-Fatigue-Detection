@@ -32,7 +32,8 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class KeyEvent:
     """A single keyboard event (press or release)."""
-    key: str        # Key identifier (obfuscated — we only store timing)
+
+    key: str  # Key identifier (obfuscated — we only store timing)
     event_type: str  # "press" or "release"
     timestamp: float = field(default_factory=time.time)
     is_backspace: bool = False
@@ -86,9 +87,15 @@ class KeyboardCollector:
             # Detect backspace without storing the key value
             is_backspace = key == kb.Key.backspace
             is_modifier = key in {
-                kb.Key.ctrl, kb.Key.ctrl_l, kb.Key.ctrl_r,
-                kb.Key.alt, kb.Key.alt_l, kb.Key.alt_r,
-                kb.Key.shift, kb.Key.shift_l, kb.Key.shift_r,
+                kb.Key.ctrl,
+                kb.Key.ctrl_l,
+                kb.Key.ctrl_r,
+                kb.Key.alt,
+                kb.Key.alt_l,
+                kb.Key.alt_r,
+                kb.Key.shift,
+                kb.Key.shift_l,
+                kb.Key.shift_r,
                 kb.Key.cmd,
             }
 

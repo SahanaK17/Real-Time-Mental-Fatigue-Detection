@@ -40,12 +40,14 @@ class UUID(types.TypeDecorator):
     Uses PostgreSQL's UUID type when using PostgreSQL,
     and CHAR(36) for SQLite and other databases.
     """
+
     impl = types.CHAR
     cache_ok = True
 
     def load_dialect_impl(self, dialect):
-        if dialect.name == 'postgresql':
+        if dialect.name == "postgresql":
             from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+
             return dialect.type_descriptor(PG_UUID())
         else:
             return dialect.type_descriptor(types.CHAR(36))
@@ -53,7 +55,7 @@ class UUID(types.TypeDecorator):
     def process_bind_param(self, value, dialect):
         if value is None:
             return value
-        if dialect.name == 'postgresql':
+        if dialect.name == "postgresql":
             return str(value)
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -66,10 +68,11 @@ class UUID(types.TypeDecorator):
             return uuid.UUID(str(value))
         return value
 
+
 from app.db.base import Base
 
-
 # ── Enums ──────────────────────────────────────────────────
+
 
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
@@ -107,8 +110,10 @@ class NotificationChannel(str, enum.Enum):
 
 # ── Mixins ─────────────────────────────────────────────────
 
+
 class UUIDMixin:
     """UUID primary key mixin."""
+
     id = Column(
         UUID(),
         primary_key=True,
@@ -119,6 +124,7 @@ class UUIDMixin:
 
 class TimestampMixin:
     """Automatic created_at/updated_at timestamps."""
+
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -133,6 +139,7 @@ class TimestampMixin:
 
 
 # ── Models ─────────────────────────────────────────────────
+
 
 class User(Base, UUIDMixin, TimestampMixin):
     """
@@ -208,9 +215,7 @@ class TrackerSession(Base, UUIDMixin, TimestampMixin):
         "FatiguePrediction", back_populates="session", cascade="all, delete-orphan"
     )
 
-    __table_args__ = (
-        Index("ix_tracker_sessions_user_started", "user_id", "started_at"),
-    )
+    __table_args__ = (Index("ix_tracker_sessions_user_started", "user_id", "started_at"),)
 
     def __repr__(self) -> str:
         return f"<TrackerSession {self.id} [{self.status}]>"
@@ -224,39 +229,43 @@ class BehaviourSnapshot(Base, UUIDMixin):
 
     __tablename__ = "behaviour_snapshots"
 
-    session_id = Column(UUID(), ForeignKey("tracker_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    session_id = Column(
+        UUID(), ForeignKey("tracker_sessions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     user_id = Column(UUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    captured_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
+    captured_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
+    )
 
     # ── Keyboard Metrics ─────────────────────────────────
-    typing_speed_wpm = Column(Float, nullable=True)       # Words per minute
-    typing_speed_cpm = Column(Float, nullable=True)       # Characters per minute
-    key_hold_time_ms = Column(Float, nullable=True)       # Average key dwell time
-    flight_time_ms = Column(Float, nullable=True)         # Average inter-key interval
-    backspace_count = Column(Integer, default=0)           # Backspaces in window
-    error_rate = Column(Float, default=0.0)               # Backspaces / total keystrokes
-    idle_time_keyboard_s = Column(Float, default=0.0)     # Seconds without keypress
-    typing_burst_score = Column(Float, nullable=True)     # Burstiness metric
-    typing_rhythm_variance = Column(Float, nullable=True) # Inter-key variance
+    typing_speed_wpm = Column(Float, nullable=True)  # Words per minute
+    typing_speed_cpm = Column(Float, nullable=True)  # Characters per minute
+    key_hold_time_ms = Column(Float, nullable=True)  # Average key dwell time
+    flight_time_ms = Column(Float, nullable=True)  # Average inter-key interval
+    backspace_count = Column(Integer, default=0)  # Backspaces in window
+    error_rate = Column(Float, default=0.0)  # Backspaces / total keystrokes
+    idle_time_keyboard_s = Column(Float, default=0.0)  # Seconds without keypress
+    typing_burst_score = Column(Float, nullable=True)  # Burstiness metric
+    typing_rhythm_variance = Column(Float, nullable=True)  # Inter-key variance
     total_keystrokes = Column(Integer, default=0)
 
     # ── Mouse Metrics ────────────────────────────────────
-    mouse_speed_px_s = Column(Float, nullable=True)       # Average cursor speed
-    mouse_acceleration = Column(Float, nullable=True)     # Speed change rate
-    mouse_distance_px = Column(Float, default=0.0)        # Total distance moved
-    click_frequency = Column(Float, default=0.0)          # Clicks per second
+    mouse_speed_px_s = Column(Float, nullable=True)  # Average cursor speed
+    mouse_acceleration = Column(Float, nullable=True)  # Speed change rate
+    mouse_distance_px = Column(Float, default=0.0)  # Total distance moved
+    click_frequency = Column(Float, default=0.0)  # Clicks per second
     double_click_count = Column(Integer, default=0)
     drag_count = Column(Integer, default=0)
     scroll_speed = Column(Float, default=0.0)
     scroll_distance = Column(Float, default=0.0)
-    idle_time_mouse_s = Column(Float, default=0.0)        # Seconds without movement
-    direction_changes = Column(Integer, default=0)        # Mouse trajectory jitter
-    hover_duration_ms = Column(Float, default=0.0)        # Average hover time
+    idle_time_mouse_s = Column(Float, default=0.0)  # Seconds without movement
+    direction_changes = Column(Integer, default=0)  # Mouse trajectory jitter
+    hover_duration_ms = Column(Float, default=0.0)  # Average hover time
 
     # ── Combined Metrics ─────────────────────────────────
-    total_idle_time_s = Column(Float, default=0.0)        # Combined idle
-    session_elapsed_s = Column(Integer, default=0)        # Seconds since session start
-    time_of_day_hour = Column(Float, nullable=True)       # Decimal hour (0-24)
+    total_idle_time_s = Column(Float, default=0.0)  # Combined idle
+    session_elapsed_s = Column(Integer, default=0)  # Seconds since session start
+    time_of_day_hour = Column(Float, nullable=True)  # Decimal hour (0-24)
 
     # Relationship
     session = relationship("TrackerSession", back_populates="behaviour_snapshots")
@@ -278,22 +287,28 @@ class FatiguePrediction(Base, UUIDMixin):
 
     __tablename__ = "fatigue_predictions"
 
-    session_id = Column(UUID(), ForeignKey("tracker_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    session_id = Column(
+        UUID(), ForeignKey("tracker_sessions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     user_id = Column(UUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    snapshot_id = Column(UUID(), ForeignKey("behaviour_snapshots.id", ondelete="SET NULL"), nullable=True)
-    predicted_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
+    snapshot_id = Column(
+        UUID(), ForeignKey("behaviour_snapshots.id", ondelete="SET NULL"), nullable=True
+    )
+    predicted_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
+    )
 
     # Prediction outputs
-    fatigue_score = Column(Float, nullable=False)          # 0.0 - 1.0
+    fatigue_score = Column(Float, nullable=False)  # 0.0 - 1.0
     fatigue_level = Column(Enum(FatigueLevel), nullable=False)
-    confidence = Column(Float, nullable=False)             # Model confidence
-    model_name = Column(String(100), nullable=False)       # e.g., "xgboost"
+    confidence = Column(Float, nullable=False)  # Model confidence
+    model_name = Column(String(100), nullable=False)  # e.g., "xgboost"
     model_version = Column(String(20), nullable=True)
 
     # Explainability
-    shap_values = Column(JSON, nullable=True)              # {feature: shap_value}
-    top_features = Column(JSON, nullable=True)             # Top 5 contributing features
-    feature_values = Column(JSON, nullable=True)           # Raw feature values used
+    shap_values = Column(JSON, nullable=True)  # {feature: shap_value}
+    top_features = Column(JSON, nullable=True)  # Top 5 contributing features
+    feature_values = Column(JSON, nullable=True)  # Raw feature values used
 
     # Explanation text
     explanation_text = Column(Text, nullable=True)
@@ -303,9 +318,7 @@ class FatiguePrediction(Base, UUIDMixin):
     session = relationship("TrackerSession", back_populates="predictions")
     recommendation = relationship("Recommendation", back_populates="prediction", uselist=False)
 
-    __table_args__ = (
-        Index("ix_fatigue_predictions_user_time", "user_id", "predicted_at"),
-    )
+    __table_args__ = (Index("ix_fatigue_predictions_user_time", "user_id", "predicted_at"),)
 
     def __repr__(self) -> str:
         return f"<FatiguePrediction score={self.fatigue_score:.2f} level={self.fatigue_level}>"
@@ -318,16 +331,22 @@ class Recommendation(Base, UUIDMixin, TimestampMixin):
 
     __tablename__ = "recommendations"
 
-    prediction_id = Column(UUID(), ForeignKey("fatigue_predictions.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
+    prediction_id = Column(
+        UUID(),
+        ForeignKey("fatigue_predictions.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
     user_id = Column(UUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=False)
-    category = Column(String(100), nullable=False)         # e.g., "break", "exercise", "hydration"
-    priority = Column(Integer, default=1)                  # 1=low, 2=medium, 3=high
-    duration_minutes = Column(Integer, nullable=True)      # Suggested activity duration
-    icon = Column(String(50), nullable=True)               # Emoji or icon code
-    action_url = Column(String(500), nullable=True)        # Optional deep link
+    category = Column(String(100), nullable=False)  # e.g., "break", "exercise", "hydration"
+    priority = Column(Integer, default=1)  # 1=low, 2=medium, 3=high
+    duration_minutes = Column(Integer, nullable=True)  # Suggested activity duration
+    icon = Column(String(50), nullable=True)  # Emoji or icon code
+    action_url = Column(String(500), nullable=True)  # Optional deep link
 
     is_dismissed = Column(Boolean, default=False)
     is_completed = Column(Boolean, default=False)
@@ -354,7 +373,7 @@ class Notification(Base, UUIDMixin, TimestampMixin):
 
     title = Column(String(255), nullable=False)
     body = Column(Text, nullable=False)
-    data = Column(JSON, nullable=True)               # Extra payload (e.g., fatigue score)
+    data = Column(JSON, nullable=True)  # Extra payload (e.g., fatigue score)
 
     is_read = Column(Boolean, default=False)
     is_sent = Column(Boolean, default=False)
@@ -364,9 +383,7 @@ class Notification(Base, UUIDMixin, TimestampMixin):
     # Relationships
     user = relationship("User", back_populates="notifications")
 
-    __table_args__ = (
-        Index("ix_notifications_user_read", "user_id", "is_read"),
-    )
+    __table_args__ = (Index("ix_notifications_user_read", "user_id", "is_read"),)
 
     def __repr__(self) -> str:
         return f"<Notification {self.type} -> {self.user_id}>"
@@ -380,13 +397,15 @@ class AuditLog(Base, UUIDMixin):
     __tablename__ = "audit_logs"
 
     user_id = Column(UUID(), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
-    action = Column(String(100), nullable=False)           # e.g., "login", "logout", "export_data"
+    action = Column(String(100), nullable=False)  # e.g., "login", "logout", "export_data"
     resource_type = Column(String(100), nullable=True)
     resource_id = Column(String(255), nullable=True)
-    ip_address = Column(String(45), nullable=True)         # Supports IPv6
+    ip_address = Column(String(45), nullable=True)  # Supports IPv6
     user_agent = Column(String(500), nullable=True)
     details = Column(JSON, nullable=True)
-    timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
+    timestamp = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False, index=True
+    )
     success = Column(Boolean, default=True)
 
     # Relationships

@@ -87,7 +87,9 @@ async def get_summary(
 
 @router.get("/daily", summary="Hourly fatigue trend for today")
 async def get_daily_trend(
-    target_date: Optional[date] = Query(default=None, description="Date (YYYY-MM-DD), defaults to today"),
+    target_date: Optional[date] = Query(
+        default=None, description="Date (YYYY-MM-DD), defaults to today"
+    ),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):

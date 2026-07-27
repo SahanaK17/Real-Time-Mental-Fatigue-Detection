@@ -107,6 +107,7 @@ class ModelRegistry:
         # Initialize SHAP explainer
         try:
             import shap
+
             self._explainer = shap.TreeExplainer(self._model)
             logger.info("SHAP explainer initialized")
         except Exception as e:
@@ -118,6 +119,7 @@ class ModelRegistry:
     @staticmethod
     def _load_artifacts(model_path: str, scaler_path: str):
         import joblib
+
         model = joblib.load(model_path)
         scaler = joblib.load(scaler_path) if os.path.exists(scaler_path) else None
         return model, scaler
@@ -145,10 +147,7 @@ class ModelRegistry:
 
         try:
             # Build feature vector in correct order
-            X = np.array([[
-                features.get(name, 0.0) or 0.0
-                for name in self._feature_names
-            ]])
+            X = np.array([[features.get(name, 0.0) or 0.0 for name in self._feature_names]])
 
             # Scale features if scaler is available
             if self._scaler is not None:
@@ -174,8 +173,7 @@ class ModelRegistry:
                         vals = shap_vals[0]
 
                     shap_values = {
-                        name: round(float(val), 6)
-                        for name, val in zip(self._feature_names, vals)
+                        name: round(float(val), 6) for name, val in zip(self._feature_names, vals)
                     }
 
                     # Top 5 most impactful features (by abs SHAP value)

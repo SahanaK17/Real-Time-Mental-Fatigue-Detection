@@ -81,6 +81,7 @@ class TrackerApp:
         # Extract user_id from token payload without verifying sig
         try:
             import base64
+
             payload = self.token.split(".")[1]
             padded = payload + "=" * (-len(payload) % 4)
             user_id = json.loads(base64.b64decode(padded).decode())["sub"]
@@ -96,9 +97,9 @@ class TrackerApp:
             "Take a 5-minute stretch break.",
             "Rest your eyes: Look 20 feet away for 20 seconds.",
             "Stand up and take a quick walk.",
-            "Do some deep breathing for a minute."
+            "Do some deep breathing for a minute.",
         ]
-        
+
         last_notified = 0
 
         while self._is_running:
@@ -120,7 +121,7 @@ class TrackerApp:
                                         title="MindGuard Fatigue Alert",
                                         message=f"Fatigue level is {level.upper()}. {tip}",
                                         app_name="MindGuard Tracker",
-                                        timeout=10
+                                        timeout=10,
                                     )
                                     logger.info("Desktop popup triggered", level=level, tip=tip)
             except Exception as e:
@@ -130,7 +131,9 @@ class TrackerApp:
 
     def start(self):
         """Start all collectors and the aggregation loop."""
-        logger.info("Starting Mental Fatigue Tracker", api_url=self.api_url, session_id=self.session_id)
+        logger.info(
+            "Starting Mental Fatigue Tracker", api_url=self.api_url, session_id=self.session_id
+        )
 
         # Start collectors in background threads
         self._keyboard.start()
@@ -266,6 +269,7 @@ def login(api_url: str, email: str, password: str) -> str:
 def start_session(api_url: str, token: str) -> str:
     """Start a new tracking session and return session ID."""
     import platform
+
     response = requests.post(
         f"{api_url}/api/v1/sessions/start",
         json={
@@ -289,8 +293,12 @@ def main():
     parser.add_argument("--token", default=None, help="JWT access token (skip login)")
     parser.add_argument("--email", default=None, help="Login email")
     parser.add_argument("--password", default=None, help="Login password")
-    parser.add_argument("--interval", type=float, default=1.0, help="Aggregation interval (seconds)")
-    parser.add_argument("--session-id", default=None, help="Existing session ID (skip session creation)")
+    parser.add_argument(
+        "--interval", type=float, default=1.0, help="Aggregation interval (seconds)"
+    )
+    parser.add_argument(
+        "--session-id", default=None, help="Existing session ID (skip session creation)"
+    )
 
     args = parser.parse_args()
 

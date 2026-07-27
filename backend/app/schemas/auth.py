@@ -5,6 +5,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 from uuid import UUID
 
+
 class UserResponse(BaseModel):
     id: UUID
     email: EmailStr
@@ -18,8 +19,10 @@ class UserResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
+
 
 class LoginResponse(BaseModel):
     access_token: str
@@ -28,12 +31,15 @@ class LoginResponse(BaseModel):
     expires_in: int
     user: UserResponse
 
+
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
 
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
 
 class SignupRequest(BaseModel):
     email: EmailStr
@@ -43,6 +49,7 @@ class SignupRequest(BaseModel):
     role: Optional[str] = None
     department: Optional[str] = None
     job_title: Optional[str] = None
+
 
 class TokenResponse(BaseModel):
     access_token: str

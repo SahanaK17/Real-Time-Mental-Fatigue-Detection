@@ -77,6 +77,7 @@ TARGET_SCORE = "fatigue_score"
 
 # ── Preprocessing ─────────────────────────────────────────
 
+
 def load_and_preprocess(data_path: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
     """Load dataset, handle missing values, engineer features."""
     print(f"\n📂 Loading data from {data_path}...")
@@ -127,6 +128,7 @@ def load_and_preprocess(data_path: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.
 
 # ── Model Definitions ─────────────────────────────────────
 
+
 def get_models() -> Dict[str, Any]:
     """Return all models to train and compare."""
     models = {}
@@ -144,6 +146,7 @@ def get_models() -> Dict[str, Any]:
     # XGBoost
     try:
         from xgboost import XGBClassifier
+
         models["xgboost"] = XGBClassifier(
             n_estimators=300,
             max_depth=6,
@@ -161,6 +164,7 @@ def get_models() -> Dict[str, Any]:
     # LightGBM
     try:
         from lightgbm import LGBMClassifier
+
         models["lightgbm"] = LGBMClassifier(
             n_estimators=300,
             num_leaves=63,
@@ -177,6 +181,7 @@ def get_models() -> Dict[str, Any]:
     # CatBoost
     try:
         from catboost import CatBoostClassifier
+
         models["catboost"] = CatBoostClassifier(
             iterations=300,
             learning_rate=0.05,
@@ -210,6 +215,7 @@ def get_models() -> Dict[str, Any]:
 
 
 # ── Training & Evaluation ─────────────────────────────────
+
 
 def train_and_evaluate(
     X: pd.DataFrame,
@@ -284,7 +290,7 @@ def train_and_evaluate(
         print(f"   Classification Report:")
         # Print indented report
         report = classification_report(y_test, y_pred, target_names=["Alert", "Fatigued"])
-        for line in report.split('\n'):
+        for line in report.split("\n"):
             print(f"   {line}")
 
         results[name] = {
@@ -302,23 +308,24 @@ def train_and_evaluate(
 
 # ── Model Selection ───────────────────────────────────────
 
+
 def select_best_model(results: Dict) -> str:
     """Select the best model by composite score (0.6*F1 + 0.4*AUC)."""
-    scores = {
-        name: 0.6 * r["test_f1"] + 0.4 * r["test_auc"]
-        for name, r in results.items()
-    }
+    scores = {name: 0.6 * r["test_f1"] + 0.4 * r["test_auc"] for name, r in results.items()}
     best = max(scores, key=scores.get)
     print(f"\n🏆 Model Comparison:")
     print("-" * 50)
     for name, score in sorted(scores.items(), key=lambda x: x[1], reverse=True):
         indicator = "★ BEST" if name == best else "      "
         r = results[name]
-        print(f"  {indicator} {name:<25} F1={r['test_f1']:.4f}  AUC={r['test_auc']:.4f}  Score={score:.4f}")
+        print(
+            f"  {indicator} {name:<25} F1={r['test_f1']:.4f}  AUC={r['test_auc']:.4f}  Score={score:.4f}"
+        )
     return best
 
 
 # ── SHAP Explainability ───────────────────────────────────
+
 
 def compute_shap_analysis(model, X_sample: pd.DataFrame, output_dir: str, model_name: str):
     """Compute and save SHAP feature importance analysis."""
@@ -343,10 +350,12 @@ def compute_shap_analysis(model, X_sample: pd.DataFrame, output_dir: str, model_
             vals = shap_values
 
         # Feature importance from SHAP
-        feature_importance = pd.DataFrame({
-            "feature": X_sample.columns,
-            "mean_abs_shap": np.abs(vals).mean(axis=0),
-        }).sort_values("mean_abs_shap", ascending=False)
+        feature_importance = pd.DataFrame(
+            {
+                "feature": X_sample.columns,
+                "mean_abs_shap": np.abs(vals).mean(axis=0),
+            }
+        ).sort_values("mean_abs_shap", ascending=False)
 
         importance_path = os.path.join(output_dir, f"shap_importance_{model_name}.csv")
         feature_importance.to_csv(importance_path, index=False)
@@ -363,6 +372,7 @@ def compute_shap_analysis(model, X_sample: pd.DataFrame, output_dir: str, model_
 
 
 # ── Export ────────────────────────────────────────────────
+
 
 def export_model(
     model,
@@ -405,6 +415,7 @@ def export_model(
 
 
 # ── Main ──────────────────────────────────────────────────
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -452,7 +463,12 @@ def main():
     # SHAP analysis on best model
     if not args.skip_shap:
         X_sample = trained_models[best_name][1]
-        compute_shap_analysis(best_model, X_sample.sample(min(1000, len(X_sample)), random_state=42), args.output, best_name)
+        compute_shap_analysis(
+            best_model,
+            X_sample.sample(min(1000, len(X_sample)), random_state=42),
+            args.output,
+            best_name,
+        )
 
     # Export
     export_model(best_model, scaler, X.columns, results, best_name, args.output)

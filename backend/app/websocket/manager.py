@@ -74,6 +74,7 @@ class WebSocketManager:
         # Also publish via Redis for multi-worker support
         try:
             from app.core.redis_client import redis_client
+
             await redis_client.publish(f"ws:user:{user_id}", message)
         except Exception as e:
             logger.warning("Redis publish failed", error=str(e), user_id=user_id)
@@ -98,6 +99,7 @@ class WebSocketManager:
         """
         try:
             from app.core.redis_client import redis_client
+
             pubsub = redis_client.pubsub()
             await pubsub.psubscribe("ws:user:*")
 

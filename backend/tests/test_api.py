@@ -4,6 +4,7 @@ Backend Test Suite — MindGuard
 Covers: authentication, behaviour ingestion, analytics,
         ML inference fallback, and WebSocket authentication.
 """
+
 import asyncio
 from typing import AsyncGenerator
 
@@ -18,9 +19,7 @@ from sqlalchemy.orm import sessionmaker
 TEST_DATABASE_URL = "sqlite+aiosqlite:///./test_mindguard.db"
 
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-TestSessionLocal = sessionmaker(
-    test_engine, class_=AsyncSession, expire_on_commit=False
-)
+TestSessionLocal = sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -90,6 +89,7 @@ async def auth_headers(client: AsyncClient, registered_user):
 
 # ── Tests: Health ────────────────────────────────────────────
 
+
 class TestHealth:
     async def test_health_endpoint_returns_ok(self, client: AsyncClient):
         response = await client.get("/health")
@@ -107,6 +107,7 @@ class TestHealth:
 
 # ── Tests: Authentication ────────────────────────────────────
 
+
 class TestAuthentication:
     async def test_signup_creates_user(self, client: AsyncClient):
         unique_user = {
@@ -121,15 +122,11 @@ class TestAuthentication:
         assert data["email"] == unique_user["email"]
         assert "hashed_password" not in data  # passwords never exposed
 
-    async def test_signup_duplicate_email_returns_409(
-        self, client: AsyncClient, registered_user
-    ):
+    async def test_signup_duplicate_email_returns_409(self, client: AsyncClient, registered_user):
         response = await client.post("/api/v1/auth/signup", json=registered_user)
         assert response.status_code == 409
 
-    async def test_login_returns_tokens(
-        self, client: AsyncClient, registered_user
-    ):
+    async def test_login_returns_tokens(self, client: AsyncClient, registered_user):
         response = await client.post(
             "/api/v1/auth/login",
             data={
@@ -144,9 +141,7 @@ class TestAuthentication:
         assert "refresh_token" in data
         assert data["token_type"] == "bearer"
 
-    async def test_login_wrong_password_returns_401(
-        self, client: AsyncClient, registered_user
-    ):
+    async def test_login_wrong_password_returns_401(self, client: AsyncClient, registered_user):
         response = await client.post(
             "/api/v1/auth/login",
             data={
@@ -157,18 +152,14 @@ class TestAuthentication:
         )
         assert response.status_code == 401
 
-    async def test_me_returns_profile(
-        self, client: AsyncClient, auth_headers
-    ):
+    async def test_me_returns_profile(self, client: AsyncClient, auth_headers):
         response = await client.get("/api/v1/auth/me", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert "email" in data
         assert "role" in data
 
-    async def test_protected_endpoint_without_token_returns_401(
-        self, client: AsyncClient
-    ):
+    async def test_protected_endpoint_without_token_returns_401(self, client: AsyncClient):
         response = await client.get("/api/v1/auth/me")
         assert response.status_code == 401
 
@@ -192,6 +183,7 @@ class TestAuthentication:
 
 # ── Tests: Session Management ────────────────────────────────
 
+
 class TestSessions:
     async def test_start_session(self, client: AsyncClient, auth_headers):
         response = await client.post("/api/v1/sessions/start", headers=auth_headers)
@@ -202,9 +194,7 @@ class TestSessions:
 
     async def test_end_session(self, client: AsyncClient, auth_headers):
         # Start first
-        start_resp = await client.post(
-            "/api/v1/sessions/start", headers=auth_headers
-        )
+        start_resp = await client.post("/api/v1/sessions/start", headers=auth_headers)
         assert start_resp.status_code == 200
 
         # End session
@@ -248,9 +238,7 @@ VALID_SNAPSHOT = {
 
 
 class TestBehaviourIngestion:
-    async def test_snapshot_submission_succeeds(
-        self, client: AsyncClient, auth_headers
-    ):
+    async def test_snapshot_submission_succeeds(self, client: AsyncClient, auth_headers):
         # Start a session first
         await client.post("/api/v1/sessions/start", headers=auth_headers)
 
@@ -262,39 +250,29 @@ class TestBehaviourIngestion:
         assert response.status_code in (200, 201, 422)
 
     async def test_snapshot_without_auth_returns_401(self, client: AsyncClient):
-        response = await client.post(
-            "/api/v1/behaviour/snapshot", json=VALID_SNAPSHOT
-        )
+        response = await client.post("/api/v1/behaviour/snapshot", json=VALID_SNAPSHOT)
         assert response.status_code == 401
 
 
 # ── Tests: Analytics ─────────────────────────────────────────
 
+
 class TestAnalytics:
     async def test_summary_returns_200(self, client: AsyncClient, auth_headers):
-        response = await client.get(
-            "/api/v1/analytics/summary", headers=auth_headers
-        )
+        response = await client.get("/api/v1/analytics/summary", headers=auth_headers)
         assert response.status_code == 200
 
-    async def test_daily_analytics_returns_200(
-        self, client: AsyncClient, auth_headers
-    ):
-        response = await client.get(
-            "/api/v1/analytics/daily", headers=auth_headers
-        )
+    async def test_daily_analytics_returns_200(self, client: AsyncClient, auth_headers):
+        response = await client.get("/api/v1/analytics/daily", headers=auth_headers)
         assert response.status_code == 200
 
-    async def test_weekly_analytics_returns_200(
-        self, client: AsyncClient, auth_headers
-    ):
-        response = await client.get(
-            "/api/v1/analytics/weekly", headers=auth_headers
-        )
+    async def test_weekly_analytics_returns_200(self, client: AsyncClient, auth_headers):
+        response = await client.get("/api/v1/analytics/weekly", headers=auth_headers)
         assert response.status_code == 200
 
 
 # ── Tests: ML Inference ──────────────────────────────────────
+
 
 class TestMLInference:
     def test_fallback_prediction_returns_score(self):

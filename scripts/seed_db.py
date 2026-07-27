@@ -15,7 +15,7 @@ import sys
 import os
 
 # Add backend to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 from passlib.context import CryptContext
 
@@ -84,7 +84,9 @@ async def seed():
         conn = await asyncpg.connect(db_url)
     except Exception as e:
         print(f"❌ Failed to connect to database: {e}")
-        print("   Make sure Docker containers are running: docker-compose -f docker-compose.dev.yml up -d")
+        print(
+            "   Make sure Docker containers are running: docker-compose -f docker-compose.dev.yml up -d"
+        )
         return
 
     print("\n🌱 Seeding database...\n")
@@ -117,7 +119,9 @@ async def seed():
                 user_data.get("job_title"),
                 user_data.get("is_verified", False),
             )
-            print(f"  ✅ {user_data['role'].upper():12} {user_data['email']} / {user_data['password']}")
+            print(
+                f"  ✅ {user_data['role'].upper():12} {user_data['email']} / {user_data['password']}"
+            )
         except Exception as e:
             print(f"  ❌ Failed to insert {user_data['email']}: {e}")
 

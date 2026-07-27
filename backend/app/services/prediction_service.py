@@ -117,9 +117,7 @@ class PredictionService:
         level = result["fatigue_level"]
         top_features = result.get("top_features", [])
 
-        explanation_parts = [
-            f"Fatigue level detected as {level.upper()} (score: {score:.0%})."
-        ]
+        explanation_parts = [f"Fatigue level detected as {level.upper()} (score: {score:.0%})."]
 
         if top_features:
             explanation_parts.append("Primary contributing factors:")
@@ -186,7 +184,9 @@ class PredictionService:
         # Select recommendation based on context
         if score >= 0.85:
             key = "critical_fatigue"
-        elif "idle_time_keyboard_s" in top_feature_names or "idle_time_mouse_s" in top_feature_names:
+        elif (
+            "idle_time_keyboard_s" in top_feature_names or "idle_time_mouse_s" in top_feature_names
+        ):
             key = "high_idle"
         elif "error_rate" in top_feature_names:
             key = "high_error_rate"
@@ -217,4 +217,6 @@ class PredictionService:
             data={"fatigue_score": result["fatigue_score"], "level": result["fatigue_level"]},
         )
         db.add(notification)
-        logger.warning("High risk fatigue detected", user_id=str(user.id), score=result["fatigue_score"])
+        logger.warning(
+            "High risk fatigue detected", user_id=str(user.id), score=result["fatigue_score"]
+        )

@@ -18,6 +18,7 @@ logger = structlog.get_logger(__name__)
 
 # ── Custom Exception Classes ──────────────────────────────
 
+
 class AppException(Exception):
     """Base application exception."""
 
@@ -92,6 +93,7 @@ class MLModelError(AppException):
 
 # ── Error Response Helper ─────────────────────────────────
 
+
 def error_response(
     status_code: int,
     error_code: str,
@@ -116,6 +118,7 @@ def error_response(
 
 
 # ── Exception Handler Registration ────────────────────────
+
 
 def setup_exception_handlers(app: FastAPI) -> None:
     """Register all exception handlers on the FastAPI app."""
@@ -162,9 +165,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(IntegrityError)
-    async def integrity_error_handler(
-        request: Request, exc: IntegrityError
-    ) -> JSONResponse:
+    async def integrity_error_handler(request: Request, exc: IntegrityError) -> JSONResponse:
         request_id = getattr(request.state, "request_id", None)
         logger.error("Database integrity error", error=str(exc), request_id=request_id)
         # Parse common constraint violations
@@ -184,9 +185,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def unhandled_exception_handler(
-        request: Request, exc: Exception
-    ) -> JSONResponse:
+    async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
         request_id = getattr(request.state, "request_id", None)
         logger.exception(
             "Unhandled exception",

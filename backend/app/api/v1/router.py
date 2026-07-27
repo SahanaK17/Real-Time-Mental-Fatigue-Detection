@@ -3,6 +3,7 @@ API v1 Router
 =============
 Aggregates all endpoint routers under /api/v1/.
 """
+
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
@@ -38,7 +39,9 @@ api_router.include_router(predictions.router, prefix="/predictions", tags=["Pred
 api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
 
 # Recommendations
-api_router.include_router(recommendations.router, prefix="/recommendations", tags=["Recommendations"])
+api_router.include_router(
+    recommendations.router, prefix="/recommendations", tags=["Recommendations"]
+)
 
 # Notifications
 api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])

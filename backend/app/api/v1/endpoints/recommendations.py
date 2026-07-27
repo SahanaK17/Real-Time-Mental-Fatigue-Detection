@@ -51,6 +51,7 @@ async def dismiss_recommendation(
     db: AsyncSession = Depends(get_db),
 ):
     from datetime import datetime, timezone
+
     result = await db.execute(
         select(Recommendation).where(
             Recommendation.id == recommendation_id,
@@ -72,6 +73,7 @@ async def complete_recommendation(
     db: AsyncSession = Depends(get_db),
 ):
     from datetime import datetime, timezone
+
     result = await db.execute(
         select(Recommendation).where(
             Recommendation.id == recommendation_id,

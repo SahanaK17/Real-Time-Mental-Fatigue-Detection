@@ -27,7 +27,9 @@ async def start_session(
     # End any existing active session first
     await db.execute(
         update(TrackerSession)
-        .where(TrackerSession.user_id == current_user.id, TrackerSession.status == SessionStatus.ACTIVE)
+        .where(
+            TrackerSession.user_id == current_user.id, TrackerSession.status == SessionStatus.ACTIVE
+        )
         .values(status=SessionStatus.INTERRUPTED, ended_at=datetime.now(timezone.utc))
     )
 
@@ -56,7 +58,9 @@ async def end_session(
 ):
     result = await db.execute(
         select(TrackerSession)
-        .where(TrackerSession.user_id == current_user.id, TrackerSession.status == SessionStatus.ACTIVE)
+        .where(
+            TrackerSession.user_id == current_user.id, TrackerSession.status == SessionStatus.ACTIVE
+        )
         .order_by(desc(TrackerSession.started_at))
         .limit(1)
     )
@@ -69,7 +73,11 @@ async def end_session(
     session.duration_seconds = int((session.ended_at - session.started_at).total_seconds())
     await db.commit()
 
-    return {"message": "Session ended", "session_id": str(session.id), "duration_s": session.duration_seconds}
+    return {
+        "message": "Session ended",
+        "session_id": str(session.id),
+        "duration_s": session.duration_seconds,
+    }
 
 
 @router.get("/active", summary="Get current active session")
@@ -79,7 +87,9 @@ async def get_active_session(
 ):
     result = await db.execute(
         select(TrackerSession)
-        .where(TrackerSession.user_id == current_user.id, TrackerSession.status == SessionStatus.ACTIVE)
+        .where(
+            TrackerSession.user_id == current_user.id, TrackerSession.status == SessionStatus.ACTIVE
+        )
         .order_by(desc(TrackerSession.started_at))
         .limit(1)
     )

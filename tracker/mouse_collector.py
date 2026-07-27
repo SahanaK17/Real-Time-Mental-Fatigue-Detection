@@ -44,7 +44,9 @@ class MouseCollector:
     never transmitted or stored long-term.
     """
 
-    def __init__(self, move_queue: queue.Queue, click_queue: queue.Queue, scroll_queue: queue.Queue):
+    def __init__(
+        self, move_queue: queue.Queue, click_queue: queue.Queue, scroll_queue: queue.Queue
+    ):
         self._move_queue = move_queue
         self._click_queue = click_queue
         self._scroll_queue = scroll_queue
@@ -100,13 +102,15 @@ class MouseCollector:
                 self._last_click_time = now
                 self._last_click_pos = (x, y)
 
-            self._click_queue.put_nowait(MouseClickEvent(
-                x=float(x),
-                y=float(y),
-                button=str(button),
-                pressed=pressed,
-                is_double_click=is_double,
-            ))
+            self._click_queue.put_nowait(
+                MouseClickEvent(
+                    x=float(x),
+                    y=float(y),
+                    button=str(button),
+                    pressed=pressed,
+                    is_double_click=is_double,
+                )
+            )
         except queue.Full:
             pass
 
@@ -114,8 +118,13 @@ class MouseCollector:
         if not self._is_running:
             return
         try:
-            self._scroll_queue.put_nowait(MouseScrollEvent(
-                x=float(x), y=float(y), dx=float(dx), dy=float(dy),
-            ))
+            self._scroll_queue.put_nowait(
+                MouseScrollEvent(
+                    x=float(x),
+                    y=float(y),
+                    dx=float(dx),
+                    dy=float(dy),
+                )
+            )
         except queue.Full:
             pass

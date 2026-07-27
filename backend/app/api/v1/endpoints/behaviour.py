@@ -52,6 +52,7 @@ async def submit_snapshot(
     session = result.scalar_one_or_none()
     if not session:
         from app.core.exceptions import NotFoundError
+
         raise NotFoundError("Active session", payload.session_id)
 
     # Create snapshot
@@ -78,16 +79,19 @@ async def submit_snapshot(
     # Broadcast via WebSocket if prediction was made
     if prediction:
         import json
+
         await ws_manager.broadcast_to_user(
             str(current_user.id),
-            json.dumps({
-                "type": "fatigue_update",
-                "fatigue_score": prediction.fatigue_score,
-                "fatigue_level": prediction.fatigue_level.value,
-                "confidence": prediction.confidence,
-                "top_features": prediction.top_features,
-                "timestamp": datetime.utcnow().isoformat(),
-            }),
+            json.dumps(
+                {
+                    "type": "fatigue_update",
+                    "fatigue_score": prediction.fatigue_score,
+                    "fatigue_level": prediction.fatigue_level.value,
+                    "confidence": prediction.confidence,
+                    "top_features": prediction.top_features,
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ),
         )
 
     return snapshot
@@ -109,6 +113,7 @@ async def submit_batch(
     """
     if len(snapshots) > 300:  # Max 5 minutes of data per batch
         from app.core.exceptions import ValidationError
+
         raise ValidationError("Maximum 300 snapshots per batch request")
 
     created_count = 0

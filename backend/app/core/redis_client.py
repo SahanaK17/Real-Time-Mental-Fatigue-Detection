@@ -56,10 +56,12 @@ class RedisClient:
 
     async def ping(self) -> bool:
         """Test Redis connectivity."""
-        if not self._is_enabled: return False
+        if not self._is_enabled:
+            return False
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return False
+            if not self._is_enabled:
+                return False
         try:
             return await self._client.ping()
         except Exception:
@@ -73,10 +75,12 @@ class RedisClient:
 
     async def get(self, key: str) -> Optional[str]:
         """Get a cached value."""
-        if not self._is_enabled: return None
+        if not self._is_enabled:
+            return None
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return None
+            if not self._is_enabled:
+                return None
         try:
             return await self._client.get(key)
         except Exception:
@@ -84,10 +88,12 @@ class RedisClient:
 
     async def set(self, key: str, value: str, expire: int = None) -> bool:
         """Set a cached value with optional TTL in seconds."""
-        if not self._is_enabled: return False
+        if not self._is_enabled:
+            return False
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return False
+            if not self._is_enabled:
+                return False
         try:
             return await self._client.set(key, value, ex=expire)
         except Exception:
@@ -95,10 +101,12 @@ class RedisClient:
 
     async def delete(self, *keys: str) -> int:
         """Delete one or more keys."""
-        if not self._is_enabled: return 0
+        if not self._is_enabled:
+            return 0
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return 0
+            if not self._is_enabled:
+                return 0
         try:
             return await self._client.delete(*keys)
         except Exception:
@@ -106,10 +114,12 @@ class RedisClient:
 
     async def exists(self, key: str) -> bool:
         """Check if a key exists."""
-        if not self._is_enabled: return False
+        if not self._is_enabled:
+            return False
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return False
+            if not self._is_enabled:
+                return False
         try:
             return bool(await self._client.exists(key))
         except Exception:
@@ -117,10 +127,12 @@ class RedisClient:
 
     async def expire(self, key: str, seconds: int) -> bool:
         """Set TTL on an existing key."""
-        if not self._is_enabled: return False
+        if not self._is_enabled:
+            return False
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return False
+            if not self._is_enabled:
+                return False
         try:
             return await self._client.expire(key, seconds)
         except Exception:
@@ -128,10 +140,12 @@ class RedisClient:
 
     async def incr(self, key: str) -> int:
         """Increment a counter."""
-        if not self._is_enabled: return 0
+        if not self._is_enabled:
+            return 0
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return 0
+            if not self._is_enabled:
+                return 0
         try:
             return await self._client.incr(key)
         except Exception:
@@ -139,10 +153,12 @@ class RedisClient:
 
     async def hset(self, name: str, mapping: dict) -> int:
         """Set hash fields."""
-        if not self._is_enabled: return 0
+        if not self._is_enabled:
+            return 0
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return 0
+            if not self._is_enabled:
+                return 0
         try:
             return await self._client.hset(name, mapping=mapping)
         except Exception:
@@ -150,10 +166,12 @@ class RedisClient:
 
     async def hget(self, name: str, key: str) -> Optional[str]:
         """Get a hash field."""
-        if not self._is_enabled: return None
+        if not self._is_enabled:
+            return None
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return None
+            if not self._is_enabled:
+                return None
         try:
             return await self._client.hget(name, key)
         except Exception:
@@ -161,10 +179,12 @@ class RedisClient:
 
     async def hgetall(self, name: str) -> dict:
         """Get all hash fields."""
-        if not self._is_enabled: return {}
+        if not self._is_enabled:
+            return {}
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return {}
+            if not self._is_enabled:
+                return {}
         try:
             return await self._client.hgetall(name)
         except Exception:
@@ -174,10 +194,12 @@ class RedisClient:
 
     async def publish(self, channel: str, message: str) -> int:
         """Publish a message to a channel."""
-        if not self._is_enabled: return 0
+        if not self._is_enabled:
+            return 0
         if not self._client:
             await self.connect()
-            if not self._is_enabled: return 0
+            if not self._is_enabled:
+                return 0
         try:
             return await self._client.publish(channel, message)
         except Exception:
@@ -204,6 +226,7 @@ class RedisClient:
     async def cache_user_session(self, user_id: str, session_data: dict) -> None:
         """Cache active user session data."""
         import json
+
         await self.set(
             f"session:{user_id}",
             json.dumps(session_data),
@@ -213,6 +236,7 @@ class RedisClient:
     async def get_cached_session(self, user_id: str) -> Optional[dict]:
         """Get cached user session."""
         import json
+
         data = await self.get(f"session:{user_id}")
         return json.loads(data) if data else None
 

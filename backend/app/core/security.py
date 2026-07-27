@@ -21,12 +21,15 @@ import bcrypt
 
 # Workaround for passlib + bcrypt >= 4.0.0 compatibility bug
 if not hasattr(bcrypt, "__about__"):
+
     class _About:
         __version__ = getattr(bcrypt, "__version__", "4.0.0")
+
     bcrypt.__about__ = _About()
 
 # Workaround for passlib detect_wrap_bug raising ValueError in bcrypt >= 4.0.0
 import passlib.handlers.bcrypt
+
 passlib.handlers.bcrypt.detect_wrap_bug = lambda ident: False
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

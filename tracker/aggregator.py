@@ -206,7 +206,7 @@ class FeatureAggregator:
                 dx = positions[i][0] - positions[i - 1][0]
                 dy = positions[i][1] - positions[i - 1][1]
                 dt = positions[i][2] - positions[i - 1][2]
-                dist = math.sqrt(dx ** 2 + dy ** 2)
+                dist = math.sqrt(dx**2 + dy**2)
                 total_dist += dist
 
                 if dt > 0:
@@ -233,7 +233,10 @@ class FeatureAggregator:
 
             # Idle time: time since last mouse move
             last_move_time = max(e.timestamp for e in moves)
-            fw.idle_time_mouse_s = max(0.0, moves[-1].timestamp + self.window_seconds - last_move_time - self.window_seconds)
+            fw.idle_time_mouse_s = max(
+                0.0,
+                moves[-1].timestamp + self.window_seconds - last_move_time - self.window_seconds,
+            )
             fw.idle_time_mouse_s = 0.0  # Movement happened in this window
 
         else:
