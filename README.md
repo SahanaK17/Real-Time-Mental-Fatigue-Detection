@@ -45,23 +45,28 @@ The system is designed around one constraint: **zero content surveillance**. Raw
 
 ## Interface Preview
 
-> Screenshots are captured from the live running application. Place images in `docs/images/` with the filenames below to populate this gallery.
 
+>The images below are authentic screenshots captured directly from the live application, displaying real-time predictions and active production data
 <details open>
-<summary><b>Application Screenshots</b></summary>
+<summary><b>MindGuard UI</b></summary>
+
 <br/>
 
-| Real-Time Dashboard | Live Fatigue Monitoring |
-|:---:|:---:|
-| `docs/images/dashboard.png` | `docs/images/live-monitoring.png` |
+### Real-Time Dashboard
 
-| Analytics & Trends | SHAP Explainability |
-|:---:|:---:|
-| `docs/images/analytics.png` | `docs/images/prediction.png` |
+![MindGuard Dashboard](docs/Screenshots/dashboard.jpeg)
 
-| Admin Panel | Authentication |
-|:---:|:---:|
-| `docs/images/admin.png` | `docs/images/login.png` |
+### Low-Fatigue Dashboard
+
+![MindGuard Low-Fatigue Dashboard](docs/Screenshots/dashboard-low-fatigue.jpeg)
+
+### Analytics & Trends
+
+![MindGuard Analytics](docs/Screenshots/analytics.jpeg)
+
+### Recommendations
+
+![MindGuard Recommendations](docs/Screenshots/recommendations.jpeg)
 
 </details>
 
